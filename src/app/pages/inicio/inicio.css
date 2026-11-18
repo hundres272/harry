@@ -1,0 +1,130 @@
+:host { display: block; padding-bottom: 40px; }
+
+/* ------------------------------------------------ portada */
+.portada {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  padding: 28px 16px;
+}
+.portada-fondo {
+  position: absolute;
+  inset: -40px;
+  background: url('/images/harrypotterbig.jpg') center / cover;
+  filter: blur(40px) brightness(0.45) saturate(1.2);
+}
+.portada::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 55%, #120e2c 100%);
+  pointer-events: none;
+}
+.portada img {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  height: 380px;
+  object-fit: contain;
+  border-radius: var(--radio);
+  box-shadow: 0 25px 60px rgb(0 0 0 / 60%), 0 0 40px rgb(232 198 106 / 15%);
+}
+
+/* ------------------------------------------------ secciones */
+.seccion {
+  max-width: 1400px;
+  margin: 28px auto 0;
+  padding: 0 24px;
+}
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.cabecera h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 2em;
+}
+.flechas { display: flex; gap: 4px; }
+
+.fila {
+  display: flex;
+  gap: 18px;
+  padding: 14px 4px 18px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.fila::-webkit-scrollbar { display: none; }
+
+/* ------------------------------------------------ tarjetas */
+.tarjeta {
+  position: relative;
+  flex: 0 0 auto;
+  width: 160px;
+  aspect-ratio: 2 / 3;
+  border-radius: 14px;
+  overflow: hidden;
+  scroll-snap-align: start;
+  box-shadow: 0 10px 25px rgb(0 0 0 / 45%);
+  outline: 1px solid var(--borde-vidrio);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.tarjeta img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.velo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 10px;
+  background: linear-gradient(to top, rgb(10 8 30 / 95%) 0%, rgb(10 8 30 / 40%) 55%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.play {
+  width: 48px;
+  height: 48px;
+  font-size: 48px;
+  color: var(--oro);
+  margin-bottom: auto;
+  margin-top: auto;
+}
+.nombre {
+  color: white;
+  font-weight: 500;
+  font-size: 0.9em;
+  text-align: center;
+  line-height: 1.25;
+}
+.tarjeta:hover,
+.tarjeta:focus-visible {
+  transform: translateY(-6px) scale(1.04);
+  box-shadow: 0 18px 40px rgb(0 0 0 / 60%), 0 0 0 2px var(--oro);
+}
+.tarjeta:hover img,
+.tarjeta:focus-visible img { transform: scale(1.06); }
+.tarjeta:hover .velo,
+.tarjeta:focus-visible .velo { opacity: 1; }
+
+@media (max-width: 600px) {
+  .portada { padding: 16px; }
+  .portada img { height: auto; width: 100%; }
+  .seccion { padding: 0 16px; margin-top: 20px; }
+  .cabecera h2 { font-size: 1.45em; }
+  .flechas { display: none; }
+  .fila { gap: 12px; }
+  .tarjeta { width: 120px; }
+}

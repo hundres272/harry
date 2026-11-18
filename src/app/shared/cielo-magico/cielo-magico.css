@@ -1,0 +1,93 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------ estrellas que titilan */
+.estrella {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 0 6px rgb(255 255 255 / 70%);
+  animation: titilar ease-in-out infinite;
+}
+.estrella:nth-child(5n) { background: #fff3c4; box-shadow: 0 0 6px rgb(232 198 106 / 80%); }
+.estrella:nth-child(7n) { background: #d9ccff; box-shadow: 0 0 6px rgb(167 139 250 / 80%); }
+
+@keyframes titilar {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ------------------------------------------------ destellos de 4 puntas */
+.brillo {
+  position: absolute;
+  width: var(--tam);
+  height: var(--tam);
+  animation: destello ease-in-out infinite;
+}
+.brillo::before,
+.brillo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, #fff8dc 0%, rgb(232 198 106 / 90%) 25%, transparent 70%);
+  clip-path: polygon(50% 0, 58% 42%, 100% 50%, 58% 58%, 50% 100%, 42% 58%, 0 50%, 42% 42%);
+  filter: drop-shadow(0 0 4px rgb(232 198 106 / 90%));
+}
+.brillo::after { transform: rotate(45deg) scale(0.55); opacity: 0.8; }
+
+@keyframes destello {
+  0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+  45%, 55% { opacity: 1; transform: scale(1) rotate(45deg); }
+}
+
+/* ------------------------------------------------ chispas doradas */
+.chispa {
+  position: absolute;
+  bottom: -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff8dc 0%, #e8c66a 45%, rgb(232 198 106 / 0%) 70%);
+  box-shadow: 0 0 8px 2px rgb(232 198 106 / 55%);
+  animation: subir linear infinite;
+}
+.chispa:nth-child(3n) {
+  background: radial-gradient(circle, #f5f0ff 0%, #a78bfa 45%, rgb(167 139 250 / 0%) 70%);
+  box-shadow: 0 0 8px 2px rgb(167 139 250 / 55%);
+}
+
+@keyframes subir {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  10% { opacity: 1; }
+  50% { transform: translate(calc(var(--deriva) * -0.5), -55vh) scale(1); }
+  85% { opacity: 0.8; }
+  100% { opacity: 0; transform: translate(var(--deriva), -110vh) scale(0.4); }
+}
+
+/* ------------------------------------------------ estrellas fugaces */
+.fugaz {
+  position: absolute;
+  width: 140px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgb(255 255 255 / 0%), rgb(255 248 220 / 90%));
+  filter: drop-shadow(0 0 6px rgb(255 248 220 / 90%));
+  opacity: 0;
+  transform: rotate(-35deg);
+  animation: fugaz ease-out infinite;
+}
+
+@keyframes fugaz {
+  0%, 88% { opacity: 0; transform: rotate(-35deg) translateX(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(-35deg) translateX(-420px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .estrella, .brillo, .chispa, .fugaz { animation: none; }
+  .chispa, .fugaz { display: none; }
+  .brillo { opacity: 0.7; }
+}

@@ -1,0 +1,207 @@
+<app-navbar />
+
+@if (cuentaAtras() !== null) {
+  <div class="overlay-siguiente" role="dialog" aria-label="Siguiente capítulo">
+    <div class="tarjeta-siguiente vidrio">
+      <span class="overlay-texto">Siguiente capítulo en</span>
+      <button class="siguiente-ahora" type="button" (click)="siguiente()" aria-label="Reproducir el siguiente capítulo ahora">
+        <mat-progress-spinner mode="determinate" diameter="150" strokeWidth="6"
+                              [value]="(cuentaAtras()! / cuentaTotal()) * 100" />
+        <span class="numero">{{ cuentaAtras() }}</span>
+      </button>
+      @if (capitulos()[posicion() + 1]; as sig) {
+        <span class="nombre-siguiente">{{ sig.id }}. {{ sig.nombre }}</span>
+      }
+      <div class="acciones-overlay">
+        <button mat-stroked-button type="button" (click)="cancelarSiguiente()">
+          <mat-icon>close</mat-icon> Cancelar
+        </button>
+        <button mat-flat-button type="button" (click)="siguiente()">
+          <mat-icon>skip_next</mat-icon> Reproducir ya
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="center" [class.abierta]="listaAbierta()" [class.unico]="unico()">
+  @if (!unico()) {
+  <aside class="lista">
+    <button class="btn-lista" type="button" (click)="toggleLista()" [attr.aria-expanded]="listaAbierta()"
+            [matTooltip]="listaAbierta() ? 'Ocultar capítulos' : 'Ver capítulos'" matTooltipPosition="right">
+      <mat-icon class="solo-escritorio">{{ listaAbierta() ? 'left_panel_close' : 'format_list_bulleted' }}</mat-icon>
+      <span class="solo-movil etiqueta-movil">
+        <mat-icon>{{ listaAbierta() ? 'expand_more' : 'expand_less' }}</mat-icon> Capítulos
+      </span>
+    </button>
+
+    @if (listaAbierta()) {
+      <ul class="capitulos">
+        @for (cap of capitulos(); track cap.id; let i = $index) {
+          <li>
+            <button type="button" [class.actual]="i === posicion()" [title]="cap.nombre" (click)="seleccionar(i)">
+              <span class="num">{{ cap.id }}</span>
+              <span class="txt">{{ cap.nombre }}</span>
+              @if (i === posicion()) {
+                <mat-icon class="sonando">graphic_eq</mat-icon>
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    } @else {
+      <span class="orientacion-cap">Capítulos</span>
+    }
+  </aside>
+  }
+
+  <main class="content">
+    @if (error()) {
+      <div class="cargando">
+        <mat-icon class="icono-error">cloud_off</mat-icon>
+        <p>{{ error() }}</p>
+        <div class="acciones-error">
+          <button mat-flat-button type="button" (click)="reintentar()"><mat-icon>refresh</mat-icon> Reintentar</button>
+          <a mat-stroked-button routerLink="/"><mat-icon>home</mat-icon> Volver al inicio</a>
+        </div>
+      </div>
+    } @else if (cargando()) {
+      <div class="cargando">
+        <mat-progress-spinner mode="indeterminate" diameter="56" />
+        <p>Cargando ...</p>
+      </div>
+    }
+
+    <ng-template #info>
+      @if (actual(); as cap) {
+        <h2 class="titulo-cap">
+          <span class="chip">
+            {{ esVideo() ? 'Película' : 'Audiolibro' }}
+            @if (!unico()) { · {{ posicion() + 1 }}/{{ capitulos().length }} }
+          </span>
+          @if (unico()) { {{ cap.nombre }} } @else { {{ cap.id }}. {{ cap.nombre }} }
+        </h2>
+      }
+
+      @if (esVideo() && puedeDescargar() && descarga(); as d) {
+        <a mat-stroked-button class="descargar" [href]="d.url" [attr.download]="d.nombre"
+           target="_blank" rel="noopener" [matTooltip]="d.nombre">
+          <mat-icon>download</mat-icon> Descargar {{ esVideo() ? 'película' : 'audio' }}
+        </a>
+      }
+    </ng-template>
+
+    @if (!unico()) {
+      <ng-container [ngTemplateOutlet]="info" />
+    }
+
+    <div class="controls">
+      @if (!unico()) {
+      <button mat-fab class="nav solo-escritorio" type="button" (click)="anterior()" [disabled]="!hayAnterior()"
+              matTooltip="Anterior" aria-label="Anterior">
+        <mat-icon>skip_previous</mat-icon>
+      </button>
+      }
+
+      <div class="contenedor-video" [class.vidrio]="esVideo()" [class.modo-audio]="!esVideo()">
+        @if (!esVideo()) {
+          <div class="disco"><mat-icon>headphones</mat-icon></div>
+        }
+        <video
+          #video
+          [class.oculto]="!esVideo()"
+          controls
+          playsinline
+          [attr.controlslist]="puedeDescargar() ? null : 'nodownload'"
+          (loadedmetadata)="alCargarMetadatos()"
+          (canplay)="alPoderReproducir()"
+          (timeupdate)="actualizarSkip()"
+          (pause)="alPausar()"
+          (ended)="alTerminar()"
+        ></video>
+        <audio
+          #audio
+          class="oculto"
+          (loadedmetadata)="alCargarMetadatos()"
+          (durationchange)="alCambiarDuracion()"
+          (canplay)="alPoderReproducir()"
+          (timeupdate)="alActualizarTiempoAudio()"
+          (play)="reproduciendo.set(true)"
+          (pause)="reproduciendo.set(false); alPausar()"
+          (ended)="alTerminar()"
+        ></audio>
+
+        @if (!esVideo()) {
+          <div class="controles-audio">
+            <div class="barra">
+              <span class="tiempo">{{ formatoTiempo(tiempo()) }}</span>
+              <mat-slider class="slider" min="0" [max]="duracion() || 1" step="1" discrete
+                          [displayWith]="formatoTiempo" [disabled]="!duracion()">
+                <input matSliderThumb aria-label="Posición" [value]="tiempo()"
+                       (input)="arrastrarBarra($any($event.target).valueAsNumber)"
+                       (change)="soltarBarra($any($event.target).valueAsNumber)" />
+              </mat-slider>
+              <span class="tiempo">-{{ formatoTiempo(duracion() - tiempo()) }}</span>
+            </div>
+
+            <div class="botones-audio">
+              <button mat-button type="button" class="velocidad" (click)="cambiarVelocidad()"
+                      matTooltip="Velocidad de reproducción" [attr.aria-label]="'Velocidad ' + velocidad() + 'x'">
+                {{ velocidad() }}x
+              </button>
+              <button mat-icon-button type="button" (click)="desplazar(-30)" matTooltip="Retroceder 30 s (Mayús + ←)" aria-label="Retroceder 30 segundos">
+                <mat-icon>replay_30</mat-icon>
+              </button>
+              <button mat-icon-button type="button" (click)="desplazar(-10)" matTooltip="Retroceder 10 s (←)" aria-label="Retroceder 10 segundos">
+                <mat-icon>replay_10</mat-icon>
+              </button>
+              <button mat-fab type="button" class="play" (click)="alternarReproduccion()"
+                      [attr.aria-label]="reproduciendo() ? 'Pausar' : 'Reproducir'" matTooltip="Reproducir / pausar (Espacio)">
+                <mat-icon>{{ reproduciendo() ? 'pause' : 'play_arrow' }}</mat-icon>
+              </button>
+              <button mat-icon-button type="button" (click)="desplazar(10)" matTooltip="Avanzar 10 s (→)" aria-label="Avanzar 10 segundos">
+                <mat-icon>forward_10</mat-icon>
+              </button>
+              <button mat-icon-button type="button" (click)="desplazar(30)" matTooltip="Avanzar 30 s (Mayús + →)" aria-label="Avanzar 30 segundos">
+                <mat-icon>forward_30</mat-icon>
+              </button>
+              @if (puedeDescargar() && descarga(); as d) {
+                <a mat-icon-button class="descargar-audio" [href]="d.url" [attr.download]="d.nombre"
+                   target="_blank" rel="noopener" [matTooltip]="'Descargar: ' + d.nombre" aria-label="Descargar audio">
+                  <mat-icon>download</mat-icon>
+                </a>
+              }
+            </div>
+          </div>
+        }
+        @if (mostrarSkip()) {
+          <button mat-flat-button class="skip" type="button" (click)="saltarIntro()">
+            Saltar intro <mat-icon iconPositionEnd>fast_forward</mat-icon>
+          </button>
+        }
+      </div>
+
+      @if (!unico()) {
+      <button mat-fab class="nav solo-escritorio" type="button" (click)="siguiente()" [disabled]="!haySiguiente()"
+              matTooltip="Siguiente" aria-label="Siguiente">
+        <mat-icon>skip_next</mat-icon>
+      </button>
+
+      <div class="botones-inferiores solo-movil">
+        <button mat-stroked-button type="button" (click)="anterior()" [disabled]="!hayAnterior()">
+          <mat-icon>skip_previous</mat-icon> Anterior
+        </button>
+        <button mat-flat-button type="button" (click)="siguiente()" [disabled]="!haySiguiente()">
+          Siguiente <mat-icon iconPositionEnd>skip_next</mat-icon>
+        </button>
+      </div>
+      }
+    </div>
+
+    @if (unico()) {
+      <div class="info-unico">
+        <ng-container [ngTemplateOutlet]="info" />
+      </div>
+    }
+  </main>
+</div>

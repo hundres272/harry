@@ -1,0 +1,134 @@
+@use '@angular/material' as mat;
+
+/* Tipografía "Harry P" (GemFonts, gratuita) + tildes y ñ añadidas. */
+@font-face {
+  font-family: 'Harry P';
+  src: url('/fonts/harryp.woff2') format('woff2');
+  font-display: swap;
+}
+
+html {
+  color-scheme: dark;
+  @include mat.theme((
+    color: (
+      theme-type: dark,
+      primary: mat.$violet-palette,
+      tertiary: mat.$yellow-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+
+  // Botones con más presencia y bordes redondeados
+  @include mat.button-overrides((
+    filled-container-shape: 12px,
+    outlined-container-shape: 12px,
+    text-container-shape: 12px,
+    protected-container-shape: 12px,
+  ));
+  @include mat.form-field-overrides((
+    outlined-container-shape: 12px,
+  ));
+}
+
+:root {
+  --fuente-magica: 'Harry P', 'Cinzel', Georgia, serif;
+  --oro: #e8c66a;
+  --oro-suave: #f3dfa2;
+  --texto: #ece6f5;
+  --texto-tenue: #b9b1cc;
+  --vidrio: rgb(24 20 48 / 55%);
+  --vidrio-fuerte: rgb(18 14 38 / 82%);
+  --borde-vidrio: rgb(255 255 255 / 10%);
+  --sombra: 0 20px 50px rgb(0 0 0 / 45%);
+  --radio: 18px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+body {
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  color: var(--texto);
+  background-color: #0a0a1f;
+  /* Las estrellas y chispas animadas están en <app-cielo-magico>. */
+  background-image:
+    radial-gradient(ellipse 60% 50% at 85% 0%, rgb(124 58 237 / 35%), transparent 70%),
+    radial-gradient(ellipse 55% 45% at 0% 100%, rgb(127 29 29 / 40%), transparent 70%),
+    radial-gradient(ellipse 40% 35% at 50% 55%, rgb(232 198 106 / 7%), transparent 70%),
+    linear-gradient(160deg, #0b0b24 0%, #15102f 45%, #1d0f2a 100%);
+  background-attachment: fixed;
+}
+
+h1, h2, h3 {
+  margin: 3px 0;
+  font-family: var(--fuente-magica);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--oro);
+  text-shadow: 0 0 18px rgb(232 198 106 / 35%);
+}
+
+/* Utilidad: tarjeta de cristal */
+.vidrio {
+  background: var(--vidrio);
+  border: 1px solid var(--borde-vidrio);
+  border-radius: var(--radio);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: var(--sombra);
+}
+
+/* Formularios de ingreso y registro */
+.pantalla-form {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 64px);
+  justify-content: center;
+  align-items: center;
+  padding: 24px 16px;
+}
+.pantalla-form.completa { min-height: 100vh; }
+
+.contenedor-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px;
+  padding: 32px 28px 28px;
+}
+.contenedor-form h2 {
+  text-align: center;
+  margin-bottom: 4px;
+  font-size: 2.6em;
+}
+.contenedor-form .subtitulo {
+  margin: 0 0 24px;
+  text-align: center;
+  color: var(--texto-tenue);
+  font-size: 0.95em;
+}
+/* Subíndice dinámico + margen: el mensaje de error empuja el siguiente campo en vez de pegarse a él. */
+.contenedor-form mat-form-field { width: 100%; margin-bottom: 14px; }
+.contenedor-form .mat-mdc-form-field-subscript-wrapper { margin-top: 4px; }
+.contenedor-form .error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgb(220 38 38 / 15%);
+  color: #fecaca;
+  font-size: 0.9em;
+}
+.contenedor-form .enviar {
+  height: 48px;
+  font-size: 1.05em;
+}
+.contenedor-form .enviar mat-progress-spinner { display: inline-block; }
